@@ -1,0 +1,4 @@
+<view class="page">
+  <view class="notice">当前已跳转到 Trip 真实详情承接页，可继续查看价格、库存并完成预订。</view>
+  <web-view src="{{url}}" wx:if="{{url}}"></web-view>
+</view>

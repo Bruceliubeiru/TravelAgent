@@ -1,0 +1,29 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "name": "TravelAgent 首页",
+      "description": "旅行规划入口，可选择城市、天数和偏好，生成 AI 行程与 Trip 门票推荐"
+    },
+    {
+      "path": "pages/chatBot/chatBot",
+      "name": "TravelAgent AI 对话",
+      "description": "输入自然语言旅行需求，生成结构化行程，并在 Agent 不可用时自动切换兜底规划"
+    },
+    {
+      "path": "pages/result/result",
+      "name": "AI 行程结果",
+      "description": "展示结构化行程、POI 推荐和 Trip 门票卡片"
+    },
+    {
+      "path": "pages/ticketDetail/ticketDetail",
+      "name": "Trip 门票详情",
+      "description": "展示门票价格、权益、推荐理由和 Trip 分销购买 CTA"
+    },
+    {
+      "path": "pages/webview/webview",
+      "name": "Trip 活动页",
+      "description": "用于承接 Trip 真实活动页 web-view 跳转"
+    }
+  ]
+}

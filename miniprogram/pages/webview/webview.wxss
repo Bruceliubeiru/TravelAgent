@@ -1,0 +1,12 @@
+.page {
+  min-height: 100vh;
+  background: #f6f7f9;
+}
+
+.notice {
+  padding: 18rpx 24rpx;
+  color: #6b7280;
+  font-size: 24rpx;
+  line-height: 1.5;
+  background: #fff;
+}

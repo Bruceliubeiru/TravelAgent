@@ -1,0 +1,9 @@
+page {
+  background: #f6f7f9;
+  color: #17212b;
+  font-family: "PingFang SC", "Helvetica Neue", sans-serif;
+}
+
+button::after {
+  border: 0;
+}

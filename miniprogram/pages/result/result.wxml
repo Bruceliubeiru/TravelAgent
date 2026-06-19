@@ -1,0 +1,91 @@
+<view class="page" wx:if="{{plan}}">
+  <view class="hero">
+    <view class="eyebrow">TravelAgent 商用化 MVP</view>
+    <view class="title">{{plan.title}}</view>
+    <view class="subtitle">当前输出已统一为结构化行程、POI 理由卡和 Trip 承接页，异常时会展示明确告警。</view>
+    <view class="meta-row">
+      <view class="meta">{{plan.city}}</view>
+      <view class="meta">{{plan.days}} 天</view>
+      <view class="meta">{{typeLabel}}</view>
+      <view class="meta">{{plan.source === 'agent' ? '智能规划' : '稳定兜底'}}</view>
+    </view>
+  </view>
+
+  <view class="notice-card" wx:for="{{plan.warnings}}" wx:key="*this">
+    {{item}}
+  </view>
+
+  <view class="section">
+    <view class="section-title">行程安排</view>
+    <block wx:for="{{plan.itinerary}}" wx:key="day">
+      <view class="day-card">
+        <view class="day-head">
+          <view class="day-index">D{{item.day}}</view>
+          <view class="day-theme">{{item.theme}}</view>
+        </view>
+        <view class="day-summary">{{item.summary}}</view>
+        <view class="poi-list">
+          <block wx:for="{{item.pois}}" wx:key="poi_id" wx:for-item="poi">
+            <view class="poi-chip">{{poi.name}}</view>
+          </block>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="section" wx:if="{{plan.pois.length}}">
+    <view class="section-title">推荐景点</view>
+    <block wx:for="{{plan.pois}}" wx:key="poi_id">
+      <view class="poi-card">
+        <image class="poi-cover" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="poi-info">
+          <view class="poi-title">{{item.name}}</view>
+          <view class="poi-reason">{{item.reason}}</view>
+          <view class="poi-meta">{{item.audience}} · {{item.stay}}</view>
+          <view class="poi-tags">
+            <block wx:for="{{item.tags}}" wx:key="*this">
+              <text>{{item}}</text>
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <view>
+        <view class="section-title">Trip 门票</view>
+        <view class="section-desc">默认展示高转化门票，可直接跳转 Trip 详情页预订，也可继续查看本地承接详情。</view>
+      </view>
+      <button class="ghost-btn" bindtap="goChat">继续问 AI</button>
+    </view>
+
+    <block wx:for="{{plan.tickets}}" wx:key="sku">
+      <view class="ticket-card">
+        <view class="ticket-main">
+          <view class="ticket-title">{{item.title}}</view>
+          <view class="ticket-benefits">
+            <block wx:for="{{item.benefits}}" wx:key="*this" wx:for-item="benefit">
+              <text>{{benefit}}</text>
+            </block>
+          </view>
+          <view class="ticket-note">{{item.bookingNote}}</view>
+          <view class="ticket-note">价格更新时间：{{item.priceUpdatedAt || item.lastUpdated}}</view>
+          <view class="score">转化优先级 {{item.conversionScore}}</view>
+        </view>
+        <view class="ticket-side">
+          <view class="price">¥{{item.price}}</view>
+          <view class="origin">¥{{item.originalPrice}}</view>
+          <view class="status-badge status-{{item.ticketStatus}}">{{statusLabelMap[item.ticketStatus] || item.ticketStatus}}</view>
+          <button class="cta" data-sku="{{item.sku}}" bindtap="purchaseTicket">{{item.purchaseTarget.buttonText || '去 Trip 预订'}}</button>
+          <button class="detail-btn" data-sku="{{item.sku}}" bindtap="viewTicket">看详情</button>
+        </view>
+      </view>
+    </block>
+
+    <view class="empty-card" wx:if="{{emptyText}}">{{emptyText}}</view>
+  </view>
+
+  <view class="note">{{plan.conversionNote}}</view>
+</view>

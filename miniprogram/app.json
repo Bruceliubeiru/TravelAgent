@@ -1,0 +1,48 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/chatBot/chatBot",
+    "pages/result/result",
+    "pages/ticketDetail/ticketDetail",
+    "pages/webview/webview"
+  ],
+  "subPackages": [
+    {
+      "root": "skills",
+      "pages": [],
+      "independent": true
+    }
+  ],
+  "usingComponents": {
+    "custom-map": "/components/toolCard/map/index",
+    "custom-weather": "/components/toolCard/weather/index",
+    "custom-business-list": "/components/toolCard/business-list/index"
+  },
+  "window": {
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "TravelAgent",
+    "backgroundColor": "#f6f7f9",
+    "backgroundTextStyle": "light",
+    "enablePullDownRefresh": true
+  },
+  "sitemapLocation": "sitemap.json",
+  "agent": {
+    "skills": [
+      {
+        "name": "travel",
+        "description": "TravelAgent 旅行规划与 Trip 门票分销：生成行程、推荐 POI、获取 Trip 门票 SKU 和分销链接",
+        "path": "skills/travel-skill"
+      }
+    ],
+    "pageMetadata": "page-meta.json"
+  },
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "networkTimeout": {
+    "request": 300000,
+    "connectSocket": 60000,
+    "uploadFile": 60000,
+    "downloadFile": 60000
+  }
+}

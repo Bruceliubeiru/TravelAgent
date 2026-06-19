@@ -1,0 +1,69 @@
+<view class="chat-page">
+  <view class="top-card">
+    <view>
+      <view class="top-title">TravelAgent AI</view>
+      <view class="top-desc">支持自由输入和快捷兜底规划；配置好新的 Agent 后，也可以在下方继续使用原生 `agent-ui`。</view>
+    </view>
+    <button class="result-btn" bindtap="openLatestResult">看结果页</button>
+  </view>
+
+  <view class="composer-card">
+    <view class="composer-title">一句话生成</view>
+    <view class="status-stack" wx:if="{{integrationStatus && planStatus && purchaseStatus}}">
+      <view class="status-card status-{{integrationStatus.level}}">
+        <view class="status-card-title">{{integrationStatus.title}}</view>
+        <view class="status-card-desc">{{integrationStatus.detail}}</view>
+      </view>
+      <view class="status-card status-{{planStatus.level}}">
+        <view class="status-card-title">{{planStatus.title}}</view>
+        <view class="status-card-desc">{{planStatus.detail}}</view>
+      </view>
+      <view class="status-card status-{{purchaseStatus.level}}">
+        <view class="status-card-title">{{purchaseStatus.title}}</view>
+        <view class="status-card-desc">{{purchaseStatus.detail}}</view>
+      </view>
+    </view>
+    <textarea
+      class="composer-input"
+      value="{{prompt}}"
+      placeholder="例如：上海亲子 2 天，想带孩子去乐园和看夜景"
+      auto-height
+      maxlength="120"
+      bindinput="handlePromptInput"
+    />
+    <view class="quick-row">
+      <block wx:for="{{quickPrompts}}" wx:key="*this">
+        <view class="quick-chip" data-prompt="{{item}}" bindtap="useQuickPrompt">{{item}}</view>
+      </block>
+    </view>
+    <button class="primary-btn" bindtap="generateByPrompt" loading="{{loading}}">
+      {{loading ? '生成中...' : '生成结构化结果'}}
+    </button>
+    <view class="status-text" wx:if="{{statusText}}">{{statusText}}</view>
+    <view class="fallback-banner" wx:if="{{fallbackMode}}">
+      当前未检测到新的微信 Agent 配置，页面会默认使用稳定兜底规划器，结果页和 Trip 跳转仍可正常体验。
+    </view>
+  </view>
+
+  <view class="preview-card" wx:if="{{latestPlan}}">
+    <view class="preview-head">
+      <view>
+        <view class="preview-title">{{latestPlan.title}}</view>
+        <view class="preview-meta">{{latestPlan.city}} · {{latestPlan.days}} 天 · {{latestPlan.source === 'agent' ? '智能规划' : '稳定兜底'}}</view>
+      </view>
+      <button class="mini-btn" bindtap="openLatestResult">打开结果页</button>
+    </view>
+    <view class="preview-warning" wx:for="{{latestPlan.warnings}}" wx:key="*this">{{item}}</view>
+  </view>
+
+  <view class="agent-panel" wx:if="{{showAgentPanel}}">
+    <view class="agent-title">已启用微信 Agent</view>
+    <agent-ui
+      agentConfig="{{agentConfig}}"
+      showBotAvatar="{{showBotAvatar}}"
+      chatMode="{{chatMode}}"
+      modelConfig="{{modelConfig}}"
+    >
+    </agent-ui>
+  </view>
+</view>

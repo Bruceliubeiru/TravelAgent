@@ -1,0 +1,72 @@
+<view class="page" wx:if="{{detail}}">
+  <view class="header">
+    <image class="header-bg" src="{{detail.poi.image}}" mode="aspectFill"></image>
+    <view class="header-mask"></view>
+    <view class="header-nav" bindtap="navigateBack">
+      <image class="icon-back" src="/imgs/back.svg"></image>
+    </view>
+    <view class="header-content">
+      <view class="label">Trip 门票分销</view>
+      <view class="poi-name">{{detail.poi.name}}</view>
+      <view class="poi-reason">{{detail.poi.reason}}</view>
+    </view>
+  </view>
+
+  <view class="panel">
+    <view class="ticket-title">{{detail.title}}</view>
+    <view class="price-row">
+      <view class="price">¥{{detail.price}}</view>
+      <view class="origin">¥{{detail.originalPrice}}</view>
+      <view class="score">转化 {{detail.conversionScore}}</view>
+    </view>
+    <view class="status-row">
+      <view class="status-badge status-{{detail.ticketStatus}}">{{statusLabelMap[detail.ticketStatus] || detail.ticketStatus}}</view>
+      <view class="mode-badge">{{purchaseModeLabelMap[detail.purchaseTarget.purchaseMode] || 'Trip 承接页'}}</view>
+    </view>
+    <view class="benefit-list">
+      <block wx:for="{{detail.benefits}}" wx:key="*this">
+        <view class="benefit">{{item}}</view>
+      </block>
+    </view>
+    <view class="body-text subtle">适合人群：{{detail.suitableFor || detail.audience}}</view>
+    <view class="body-text subtle">价格更新时间：{{detail.priceUpdatedAt || detail.lastUpdated}}</view>
+  </view>
+
+  <view class="panel">
+    <view class="section-title">推荐理由</view>
+    <view class="body-text">{{detail.poi.reason}}</view>
+    <view class="tag-row">
+      <block wx:for="{{detail.poi.tags}}" wx:key="*this">
+        <view class="tag">{{item}}</view>
+      </block>
+    </view>
+  </view>
+
+  <view class="panel bottom-space">
+    <view class="section-title">购买说明</view>
+    <view class="body-text">{{detail.bookingNote}}</view>
+    <view class="body-text subtle">当前承接方式：{{purchaseModeLabelMap[detail.purchaseTarget.purchaseMode] || 'Trip 承接页'}}。</view>
+    <view class="body-text subtle">失败兜底：{{detail.purchaseTarget.reason}}</view>
+    <view class="body-text subtle">若目标页缺失或打开失败，会自动回退到可打开的 Trip 承接页，不会出现空白页。</view>
+  </view>
+
+  <view class="bottom-bar">
+    <view>
+      <view class="bottom-price">¥{{detail.price}}</view>
+      <view class="bottom-sub">{{statusLabelMap[detail.ticketStatus] || detail.ticketStatus}} · Trip 实时页校验</view>
+    </view>
+    <button class="buy-btn" bindtap="buyTicket" disabled="{{detail.purchaseTarget.purchaseMode === 'disabled'}}">{{detail.purchaseTarget.buttonText || detail.cta}}</button>
+  </view>
+</view>
+<view class="empty-page" wx:elif="{{!loading}}">
+  <view class="empty-card">
+    <view class="section-title">未找到门票信息</view>
+    <view class="body-text">当前缺少可展示的门票详情，请返回结果页重新选择，或切换到支持城市继续体验。</view>
+  </view>
+</view>
+<view class="empty-page" wx:else>
+  <view class="empty-card">
+    <view class="section-title">门票详情加载中</view>
+    <view class="body-text">正在刷新最新票券信息，请稍候。</view>
+  </view>
+</view>

@@ -1,0 +1,100 @@
+{
+  "apis": [
+    {
+      "name": "generateTripPlan",
+      "description": "生成结构化旅行计划，并优先绑定可转化 Trip 门票。调用前置条件：用户提供或可从上下文推断城市；天数缺失时默认 2 天；偏好缺失时默认 family。输出包括 title、itinerary、pois、tickets。",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "description": "目的地城市。MVP 支持：上海、东京、新加坡。必须来自用户原话或上下文。"
+          },
+          "days": {
+            "type": "number",
+            "description": "旅行天数，MVP 支持 1 到 3 天。用户未说明时填 2。"
+          },
+          "type": {
+            "type": "string",
+            "description": "旅行偏好。family=亲子，couple=情侣朋友，culture=文化探索，default=经典首次游。",
+            "enum": ["family", "couple", "culture", "default"]
+          }
+        },
+        "required": ["city"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "city": { "type": "string" },
+          "days": { "type": "number" },
+          "type": { "type": "string" },
+          "itinerary": { "type": "array" },
+          "pois": { "type": "array" },
+          "tickets": { "type": "array" },
+          "source": { "type": "string", "enum": ["agent", "fallback"] },
+          "warnings": { "type": "array" },
+          "generatedAt": { "type": "string" },
+          "resultPage": { "type": "string" }
+        }
+      }
+    },
+    {
+      "name": "recommendPoi",
+      "description": "按城市和偏好标签推荐 POI，优先返回可绑定 Trip 门票的高转化景点。调用前置条件：必须有城市。禁止把未返回的 poi_id 传给 getTripTicket。",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "city": { "type": "string", "description": "目的地城市，MVP 支持上海、东京、新加坡。" },
+          "tag": { "type": "string", "description": "可选偏好标签，如亲子、乐园、夜景、文化。" }
+        },
+        "required": ["city"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "items": { "type": "array" },
+          "total": { "type": "number" }
+        }
+      }
+    },
+    {
+      "name": "getTripTicket",
+      "description": "根据 poi_id 获取 Trip 门票 SKU、价格、可购状态与购买目标。调用前置条件：poi_id 必须来自 generateTripPlan 或 recommendPoi 返回值，禁止编造。",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "poi_id": { "type": "string", "description": "POI ID，必须来自上游接口返回。" }
+        },
+        "required": ["poi_id"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "poi_id": { "type": "string" },
+          "sku": { "type": "string" },
+          "title": { "type": "string" },
+          "price": { "type": "number" },
+          "cta": { "type": "string" },
+          "ticketStatus": {
+            "type": "string",
+            "enum": ["available", "limited", "unavailable"]
+          },
+          "purchaseTarget": {
+            "type": "object",
+            "properties": {
+              "purchaseMode": {
+                "type": "string",
+                "enum": ["miniProgram", "webView", "disabled"]
+              },
+              "url": { "type": "string" },
+              "fallbackUrl": { "type": "string" },
+              "buttonText": { "type": "string" },
+              "reason": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
