@@ -1,5 +1,7 @@
 const { getIntegrationStatus, getRuntimeConfig } = require("../../utils/runtime-config");
 const {
+  buildResultPageUrl,
+  getLatestPlan,
   getTripTicketService,
   planTrip,
   recommendPoiService,
@@ -17,10 +19,11 @@ function formatPlanForAssistant(plan) {
     .slice(0, 3)
     .map((ticket) => {
       const target = ticket.purchaseTarget || {};
-      return `- ${ticket.title} ¥${ticket.price}，${target.buttonText || ticket.cta}: ${target.url || target.fallbackUrl || "Trip 城市页"}`;
+      const pricePrefix = ticket.priceType === "reference" ? "参考价 " : "";
+      return `- ${ticket.title} ${pricePrefix}¥${ticket.price}，${target.buttonText || ticket.cta}: ${target.url || target.fallbackUrl || "Trip 城市页"}`;
     })
     .join("\n");
-  return `${plan.title}\n${days}\n\nTrip 门票推荐:\n${tickets}\n\n结构化结果页：/pages/result/result`;
+  return `${plan.title}\n${days}\n\nTrip 门票推荐:\n${tickets}\n\n结构化结果页已写入最近计划缓存，可直接打开。`;
 }
 
 Page({
@@ -33,6 +36,7 @@ Page({
     integrationStatus: null,
     planStatus: null,
     purchaseStatus: null,
+    agentDiagnostics: [],
     quickPrompts: ["上海亲子 2 天", "东京情侣 3 天", "新加坡文化 2 天"],
     chatMode: "bot",
     showBotAvatar: true,
@@ -65,7 +69,7 @@ Page({
               city: params.city,
               days: params.days,
               type: params.type || "family",
-            });
+            }, { preferAgent: false });
             return {
               ...plan,
               assistant_summary: formatPlanForAssistant(plan),
@@ -105,8 +109,10 @@ Page({
             properties: {},
           },
           handler: () => {
-            wx.navigateTo({ url: "/pages/result/result" });
-            return { opened: true, page: "/pages/result/result" };
+            const latestPlan = getLatestPlan();
+            const page = buildResultPageUrl(latestPlan && latestPlan.planId);
+            wx.navigateTo({ url: page });
+            return { opened: true, page };
           },
         },
       ],
@@ -128,16 +134,20 @@ Page({
       botId: (runtime.agent && runtime.agent.botId) || "",
       showToolCallDetail: false,
     };
+    const latestPlan = getLatestPlan();
     this.setData({
       agentConfig: nextAgentConfig,
-      showAgentPanel: status.agentConfigured,
-      fallbackMode: !status.agentConfigured,
+      showAgentPanel: status.chatAgentReady,
+      fallbackMode: !status.planAgentReady,
       integrationStatus: status.integrationStatus,
+      latestPlan,
+      agentDiagnostics: status.agentDiagnostics || [],
       planStatus: status.planStatus,
       purchaseStatus: status.purchaseStatus,
     });
     trackEvent("chat_page_view", {
-      hasAgentAccess: status.agentConfigured,
+      chatAgentReady: status.chatAgentReady,
+      planAgentReady: status.planAgentReady,
       envName: status.envName,
     });
   },
@@ -174,7 +184,7 @@ Page({
   },
 
   openResult() {
-    wx.navigateTo({ url: "/pages/result/result" });
+    wx.navigateTo({ url: buildResultPageUrl() });
   },
 
   openLatestResult() {
@@ -182,8 +192,6 @@ Page({
       this.openResult();
       return;
     }
-    wx.navigateTo({
-      url: `/pages/result/result?city=${encodeURIComponent(this.data.latestPlan.city)}&days=${this.data.latestPlan.days}&type=${this.data.latestPlan.type}`,
-    });
+    wx.navigateTo({ url: buildResultPageUrl(this.data.latestPlan.planId) });
   },
 });

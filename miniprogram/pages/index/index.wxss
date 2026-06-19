@@ -76,7 +76,8 @@ page {
 .planner,
 .flow,
 .feature-card,
-.status-card {
+.status-card,
+.diagnostics-panel {
   margin: 24rpx 28rpx 0;
   padding: 30rpx;
   border-radius: 16rpx;
@@ -213,6 +214,42 @@ page {
 
 .status-degraded {
   border-left: 8rpx solid #d97706;
+}
+
+.diagnostic-card {
+  margin-top: 18rpx;
+  padding: 20rpx 22rpx;
+  border-radius: 14rpx;
+  background: #f8fafc;
+}
+
+.diag-ready {
+  border-left: 8rpx solid #1f8a70;
+}
+
+.diag-fallback {
+  border-left: 8rpx solid #e4552d;
+}
+
+.diag-degraded {
+  border-left: 8rpx solid #d97706;
+}
+
+.diagnostic-title {
+  font-size: 27rpx;
+  font-weight: 800;
+}
+
+.diagnostic-detail,
+.diagnostic-action {
+  margin-top: 8rpx;
+  color: #5f6c7b;
+  font-size: 24rpx;
+  line-height: 1.55;
+}
+
+.diagnostic-action {
+  color: #334e68;
 }
 
 .flow-row {

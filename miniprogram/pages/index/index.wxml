@@ -76,6 +76,17 @@
     </view>
   </view>
 
+  <view class="diagnostics-panel" wx:if="{{agentDiagnostics.length}}">
+    <view class="section-title">Agent 联调诊断</view>
+    <block wx:for="{{agentDiagnostics}}" wx:key="title">
+      <view class="diagnostic-card diag-{{item.level}}">
+        <view class="diagnostic-title">{{item.title}}</view>
+        <view class="diagnostic-detail">{{item.detail}}</view>
+        <view class="diagnostic-action" wx:if="{{item.action}}">建议：{{item.action}}</view>
+      </view>
+    </block>
+  </view>
+
   <view class="flow">
     <view class="section-title">MVP 链路</view>
     <view class="flow-row">

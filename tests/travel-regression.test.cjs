@@ -2,6 +2,9 @@ const assert = require("assert");
 const path = require("path");
 
 const miniprogramTravel = require(path.join(__dirname, "..", "miniprogram", "utils", "travel-data.js"));
+const travelService = require(path.join(__dirname, "..", "miniprogram", "utils", "travel-service.js"));
+const runtimeConfig = require(path.join(__dirname, "..", "miniprogram", "utils", "runtime-config.js"));
+const agentPlanAdapter = require(path.join(__dirname, "..", "miniprogram", "utils", "agent-plan-adapter.js"));
 const cloudTravel = require(path.join(
   __dirname,
   "..",
@@ -89,6 +92,7 @@ async function main() {
   await runCase("get ticket when user only asks for tickets", async () => {
     const ticket = miniprogramTravel.getTripTicket("sentosa");
     assert.strictEqual(ticket.poi_id, "sentosa");
+    assert.strictEqual(ticket.priceType, "reference");
     assert.strictEqual(ticket.purchaseTarget.purchaseMode, "webView");
     assert.strictEqual(ticket.purchaseTarget.url.includes("trip.com"), true);
   });
@@ -97,6 +101,16 @@ async function main() {
     delete process.env.TRAVEL_AGENT_MODE;
     delete process.env.TRAVEL_AGENT_BOT_ID;
     const result = await travelHandlers.handlePlanTrip({ city: "上海", days: 2, type: "family" });
+    assert.strictEqual(result.ok, true);
+    assert.strictEqual(result.plan.source, "fallback");
+  });
+
+  await runCase("planTrip handler ignores legacy server agent env flags", async () => {
+    process.env.TRAVEL_AGENT_MODE = "enabled";
+    process.env.TRAVEL_AGENT_BOT_ID = "agent-server-side";
+    const result = await travelHandlers.handlePlanTrip({ city: "东京", days: 2, type: "couple" });
+    delete process.env.TRAVEL_AGENT_MODE;
+    delete process.env.TRAVEL_AGENT_BOT_ID;
     assert.strictEqual(result.ok, true);
     assert.strictEqual(result.plan.source, "fallback");
   });
@@ -165,6 +179,7 @@ async function main() {
     const disney = cloudTravel.getTicketBySku("TDS-1D");
     const disneyseaUrl = disney.purchaseTarget.url || "";
     assert.strictEqual(disney.purchaseTarget.purchaseMode, "webView");
+    assert.strictEqual(disney.priceType, "reference");
     assert.strictEqual(
       disneyseaUrl.includes("/things-to-do/experiences/") || disneyseaUrl.includes("/travel-guide/attraction/"),
       true,
@@ -217,6 +232,127 @@ async function main() {
     assert.strictEqual(parsed.city, "东京");
     assert.strictEqual(parsed.days, 3);
     assert.strictEqual(parsed.type, "couple");
+  });
+
+  await runCase("plan identity helpers add planId query and ttl", async () => {
+    const basePlan = miniprogramTravel.generateTripPlan("上海", 2, "family");
+    const snapshot = travelService.attachPlanIdentity(basePlan, { text: "上海亲子 2 天" }, {
+      planId: "plan_test",
+      generatedAt: "2026-06-19T00:00:00.000Z",
+    });
+    assert.strictEqual(snapshot.planId, "plan_test");
+    assert.strictEqual(snapshot.query, "上海亲子 2 天");
+    assert.strictEqual(snapshot.expiresAt, "2026-06-20T00:00:00.000Z");
+    assert.strictEqual(travelService.isPlanExpired(snapshot, Date.parse(snapshot.expiresAt) - 1), false);
+    assert.strictEqual(travelService.isPlanExpired(snapshot, Date.parse(snapshot.expiresAt) + 1), true);
+    assert.strictEqual(
+      travelService.buildResultPageUrl(snapshot.planId),
+      "/pages/result/result?planId=plan_test",
+    );
+  });
+
+  await runCase("ticket lookup can resolve from plan snapshot by sku", async () => {
+    const plan = travelService.attachPlanIdentity(miniprogramTravel.generateTripPlan("上海", 2, "family"), {
+      city: "上海",
+      days: 2,
+      type: "family",
+    }, {
+      planId: "plan_lookup",
+    });
+    const ticket = travelService.findTicketInPlan(plan, "SHDR-1D");
+    assert.strictEqual(ticket.sku, "SHDR-1D");
+    assert.strictEqual(ticket.poi.name, "上海迪士尼度假区");
+  });
+
+  await runCase("runtime status distinguishes chat and plan agent readiness", async () => {
+    const baseRuntime = {
+      envName: "prod",
+      cloud: {
+        envId: "env-prod",
+        functionName: "travelGateway",
+      },
+      trip: {
+        domain: "https://jp.trip.com",
+        homeUrl: "https://jp.trip.com/things-to-do/?locale=ja_jp&curr=JPY",
+        locale: "ja-JP",
+        currency: "JPY",
+      },
+      product: {
+        supportedCities: ["上海", "东京", "新加坡"],
+      },
+    };
+
+    const legacyBotStatus = runtimeConfig.getIntegrationStatus(
+      {
+        ...baseRuntime,
+        agent: {
+          enabled: true,
+          botId: "ibot-legacy",
+        },
+      },
+      {
+        sdkVersion: "3.8.0",
+        aiRuntimeReady: true,
+      },
+    );
+    assert.strictEqual(legacyBotStatus.chatAgentReady, true);
+    assert.strictEqual(legacyBotStatus.planAgentReady, false);
+
+    const planAgentStatus = runtimeConfig.getIntegrationStatus(
+      {
+        ...baseRuntime,
+        agent: {
+          enabled: true,
+          botId: "agent-v2-demo",
+        },
+      },
+      {
+        sdkVersion: "3.8.0",
+        aiRuntimeReady: true,
+      },
+    );
+    assert.strictEqual(planAgentStatus.chatAgentReady, true);
+    assert.strictEqual(planAgentStatus.planAgentReady, true);
+  });
+
+  await runCase("agent adapter merges strict json patch into base plan", async () => {
+    const basePlan = miniprogramTravel.generateTripPlan("东京", 2, "couple");
+    const patch = {
+      title: "东京 2 天游览优化版",
+      itinerary: basePlan.itinerary.map((day) => ({
+        day: day.day,
+        theme: `${day.theme}·优化`,
+        summary: `${day.summary} 并补充了更清晰的情侣动线。`,
+      })),
+      warnings: ["已按情侣场景优化每日摘要"],
+    };
+    const merged = agentPlanAdapter.finalizeAgentPlan(basePlan, {
+      executedTools: ["compose_base_plan"],
+      finalText: JSON.stringify(patch),
+    });
+    assert.strictEqual(merged.source, "agent");
+    assert.strictEqual(merged.title, patch.title);
+    assert.strictEqual(merged.tickets.length, basePlan.tickets.length);
+    assert.strictEqual(merged.itinerary[0].theme, patch.itinerary[0].theme);
+  });
+
+  await runCase("agent adapter rejects invalid json and timeout", async () => {
+    const basePlan = miniprogramTravel.generateTripPlan("上海", 2, "family");
+    assert.throws(() => {
+      agentPlanAdapter.finalizeAgentPlan(basePlan, {
+        executedTools: ["compose_base_plan"],
+        finalText: "not-json",
+      });
+    }, /严格 JSON/);
+    assert.throws(() => {
+      agentPlanAdapter.finalizeAgentPlan(basePlan, {
+        executedTools: [],
+        finalText: "{}",
+      });
+    }, /compose_base_plan/);
+    assert.throws(() => {
+      agentPlanAdapter.ensureBeforeDeadline(Date.now() - 1, Date.now());
+    }, /超时/);
   });
 
   console.log("All TravelAgent regression checks passed.");

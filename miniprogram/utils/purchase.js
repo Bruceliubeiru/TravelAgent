@@ -1,8 +1,8 @@
-const { resolvePurchaseTarget, trackEvent } = require("./travel-service");
+const { getTicketEventContext, resolvePurchaseTarget, trackEvent } = require("./travel-service");
 
 function toWebviewUrl(target, title) {
   const url = encodeURIComponent(target.url || target.fallbackUrl || "");
-  const safeTitle = encodeURIComponent(title || "Trip 详情页");
+  const safeTitle = encodeURIComponent(title || "Trip 预订页");
   return `/pages/webview/webview?url=${url}&title=${safeTitle}`;
 }
 
@@ -42,9 +42,9 @@ function navigateMiniProgram(target, title) {
 
 async function openPurchaseFlow(params = {}, title = "") {
   const target = await resolvePurchaseTarget(params);
+  const eventContext = getTicketEventContext(params);
   trackEvent("purchase_target_resolved", {
-    sku: params.sku || "",
-    poi_id: params.poi_id || "",
+    ...eventContext,
     purchaseMode: target.purchaseMode,
   });
 
@@ -62,8 +62,7 @@ async function openPurchaseFlow(params = {}, title = "") {
   }
 
   trackEvent("purchase_target_opened", {
-    sku: params.sku || "",
-    poi_id: params.poi_id || "",
+    ...eventContext,
     purchaseMode: target.purchaseMode,
   });
   return target;

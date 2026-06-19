@@ -22,7 +22,7 @@ async function getTripTicketApi({ poi_id } = {}) {
       content: [
         {
           type: "text",
-          text: `已找到 ${ticket.title}，可用 ${ticket.purchaseTarget.buttonText || ticket.cta} 承接 Trip 转化。`,
+          text: `已找到 ${ticket.title}，当前展示为${ticket.priceType === "reference" ? "参考价" : "实时价"}，可用 ${ticket.purchaseTarget.buttonText || ticket.cta} 承接 Trip 转化。`,
         },
       ],
       structuredContent: ticket,

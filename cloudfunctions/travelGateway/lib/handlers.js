@@ -9,7 +9,6 @@ const {
   normalizeType,
   parseUserPrompt,
   recommendPoi,
-  tryAgentPlan,
 } = require("./travel-engine");
 const { persistTravelEvent } = require("./event-store");
 
@@ -44,17 +43,10 @@ function normalizePayload(payload = {}) {
 
 async function handlePlanTrip(payload) {
   const normalized = normalizePayload(payload);
-  const agentPlan = tryAgentPlan(normalized);
-
-  if (agentPlan) {
-    return ok({ plan: agentPlan });
-  }
-
   const plan = normalized.text
     ? buildPlanFromPrompt(normalized.text, normalized)
     : generateTripPlan(normalized.city || "上海", normalized.days || 2, normalized.type || "default", {
         source: "fallback",
-        warnings: ["未启用真实微信 Agent，当前返回稳定兜底结果。"],
       });
   return ok({ plan });
 }

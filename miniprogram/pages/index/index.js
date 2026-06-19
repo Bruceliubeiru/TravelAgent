@@ -1,4 +1,4 @@
-const { planTrip, trackEvent } = require("../../utils/travel-service");
+const { buildResultPageUrl, planTrip, trackEvent } = require("../../utils/travel-service");
 const { getIntegrationStatus } = require("../../utils/runtime-config");
 
 Page({
@@ -25,6 +25,7 @@ Page({
     integrationStatus: null,
     planStatus: null,
     purchaseStatus: null,
+    agentDiagnostics: [],
     runtimeEnv: "dev",
   },
 
@@ -34,12 +35,14 @@ Page({
       integrationStatus: status.integrationStatus,
       planStatus: status.planStatus,
       purchaseStatus: status.purchaseStatus,
+      agentDiagnostics: status.agentDiagnostics || [],
       runtimeEnv: status.envName,
     });
     trackEvent("home_page_view", {
       envName: status.envName,
       cloudConfigured: status.cloudConfigured,
-      agentConfigured: status.agentConfigured,
+      chatAgentReady: status.chatAgentReady,
+      planAgentReady: status.planAgentReady,
     });
   },
 
@@ -86,7 +89,7 @@ Page({
       statusText,
     });
     wx.navigateTo({
-      url: `/pages/result/result?city=${encodeURIComponent(plan.city)}&days=${plan.days}&type=${plan.type}`,
+      url: buildResultPageUrl(plan.planId),
     });
   },
 

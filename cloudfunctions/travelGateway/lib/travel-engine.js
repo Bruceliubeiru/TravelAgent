@@ -123,6 +123,7 @@ function buildTicketSummary(ticket, poi) {
     price: ticket.price,
     originalPrice: ticket.originalPrice,
     currency: ticket.currency,
+    priceType: ticket.priceType || "reference",
     benefits: ticket.benefits,
     cta: ticket.cta,
     conversionScore: ticket.conversionScore,
@@ -232,7 +233,7 @@ function generateTripPlan(city = "上海", days = 2, type = "default", options =
     warnings,
     generatedAt: new Date().toISOString(),
     resultPage: RESULT_PAGE,
-    conversionNote: "景点排序优先考虑转化率、线路顺滑度和大众决策成本；实时价格与库存请以 Trip 页面为准。",
+    conversionNote: "景点排序优先考虑转化率、线路顺滑度和大众决策成本；卡片价格为目录参考价，最新价格与库存请以 Trip 下单页为准。",
   };
 }
 

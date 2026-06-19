@@ -41,8 +41,19 @@
     </button>
     <view class="status-text" wx:if="{{statusText}}">{{statusText}}</view>
     <view class="fallback-banner" wx:if="{{fallbackMode}}">
-      当前未检测到新的微信 Agent 配置，页面会默认使用稳定兜底规划器，结果页和 Trip 跳转仍可正常体验。
+      当前结构化 planTrip 仍走稳定兜底规划；即使下方聊天 Agent 可用，结果页和 Trip 跳转也会保持可用且不会静默失败。
     </view>
+  </view>
+
+  <view class="diagnostics-card" wx:if="{{agentDiagnostics.length}}">
+    <view class="composer-title">Agent 联调诊断</view>
+    <block wx:for="{{agentDiagnostics}}" wx:key="title">
+      <view class="agent-diagnostic diag-{{item.level}}">
+        <view class="agent-diagnostic-title">{{item.title}}</view>
+        <view class="agent-diagnostic-detail">{{item.detail}}</view>
+        <view class="agent-diagnostic-action" wx:if="{{item.action}}">建议：{{item.action}}</view>
+      </view>
+    </block>
   </view>
 
   <view class="preview-card" wx:if="{{latestPlan}}">

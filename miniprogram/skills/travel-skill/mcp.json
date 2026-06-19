@@ -35,7 +35,10 @@
           "source": { "type": "string", "enum": ["agent", "fallback"] },
           "warnings": { "type": "array" },
           "generatedAt": { "type": "string" },
-          "resultPage": { "type": "string" }
+          "resultPage": { "type": "string" },
+          "planId": { "type": "string" },
+          "query": { "type": "string" },
+          "expiresAt": { "type": "string" }
         }
       }
     },
@@ -75,6 +78,7 @@
           "sku": { "type": "string" },
           "title": { "type": "string" },
           "price": { "type": "number" },
+          "priceType": { "type": "string", "enum": ["reference", "live"] },
           "cta": { "type": "string" },
           "ticketStatus": {
             "type": "string",

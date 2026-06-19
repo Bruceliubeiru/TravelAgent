@@ -15,8 +15,8 @@
   <view class="panel">
     <view class="ticket-title">{{detail.title}}</view>
     <view class="price-row">
-      <view class="price">¥{{detail.price}}</view>
-      <view class="origin">¥{{detail.originalPrice}}</view>
+      <view class="price">{{detail.priceType === 'reference' ? '参考价 ' : ''}}¥{{detail.price}}</view>
+      <view class="origin">{{detail.priceType === 'reference' ? '原价参考 ' : ''}}¥{{detail.originalPrice}}</view>
       <view class="score">转化 {{detail.conversionScore}}</view>
     </view>
     <view class="status-row">
@@ -29,6 +29,7 @@
       </block>
     </view>
     <view class="body-text subtle">适合人群：{{detail.suitableFor || detail.audience}}</view>
+    <view class="body-text subtle">价格类型：{{detail.priceType === 'reference' ? '目录参考价，最新价格以下单页为准' : '实时价'}}</view>
     <view class="body-text subtle">价格更新时间：{{detail.priceUpdatedAt || detail.lastUpdated}}</view>
   </view>
 
@@ -45,15 +46,16 @@
   <view class="panel bottom-space">
     <view class="section-title">购买说明</view>
     <view class="body-text">{{detail.bookingNote}}</view>
+    <view class="body-text subtle" wx:if="{{stale}}">当前内容来自最近一次计划快照；如需更新价格参考，请返回结果页下拉刷新。</view>
     <view class="body-text subtle">当前承接方式：{{purchaseModeLabelMap[detail.purchaseTarget.purchaseMode] || 'Trip 承接页'}}。</view>
     <view class="body-text subtle">失败兜底：{{detail.purchaseTarget.reason}}</view>
-    <view class="body-text subtle">若目标页缺失或打开失败，会自动回退到可打开的 Trip 承接页，不会出现空白页。</view>
+    <view class="body-text subtle">点击按钮后会前往 Trip 查看最新价格并预订；若目标页缺失或打开失败，会自动回退到可打开的 Trip 承接页，不会出现空白页。</view>
   </view>
 
   <view class="bottom-bar">
     <view>
-      <view class="bottom-price">¥{{detail.price}}</view>
-      <view class="bottom-sub">{{statusLabelMap[detail.ticketStatus] || detail.ticketStatus}} · Trip 实时页校验</view>
+      <view class="bottom-price">{{detail.priceType === 'reference' ? '参考价 ' : ''}}¥{{detail.price}}</view>
+      <view class="bottom-sub">{{statusLabelMap[detail.ticketStatus] || detail.ticketStatus}} · {{detail.priceType === 'reference' ? '最新价格以下单页为准' : 'Trip 实时价'}}</view>
     </view>
     <button class="buy-btn" bindtap="buyTicket" disabled="{{detail.purchaseTarget.purchaseMode === 'disabled'}}">{{detail.purchaseTarget.buttonText || detail.cta}}</button>
   </view>

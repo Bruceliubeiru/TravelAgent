@@ -1,4 +1,4 @@
 <view class="page">
-  <view class="notice">当前已跳转到 Trip 真实详情承接页，可继续查看价格、库存并完成预订。</view>
+  <view class="notice">当前将前往 Trip 查看最新价格与库存，并继续完成预订；门票卡片展示为目录参考价，最终以下单页为准。</view>
   <web-view src="{{url}}" wx:if="{{url}}"></web-view>
 </view>
