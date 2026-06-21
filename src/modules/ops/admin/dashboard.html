@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ops Center Dashboard</title>
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 32px; color: #172033; }
+    .card { border: 1px solid #d8dee9; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .metric { background: #f7f9fc; border-radius: 10px; padding: 12px; }
+    code { background: #f2f4f7; padding: 2px 6px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Ops Center Dashboard</h1>
+  <p>P0 dashboard for create task -> pending -> callback -> dashboard.</p>
+
+  <section class="card">
+    <h2>Status</h2>
+    <div class="grid">
+      <div class="metric"><strong>Total</strong><br /><span id="total">0</span></div>
+      <div class="metric"><strong>Pending</strong><br /><span id="pending">0</span></div>
+      <div class="metric"><strong>Running</strong><br /><span id="running">0</span></div>
+      <div class="metric"><strong>Succeeded</strong><br /><span id="succeeded">0</span></div>
+      <div class="metric"><strong>Failed</strong><br /><span id="failed">0</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>API Contract</h2>
+    <p>This static page is intentionally not wired into the existing mini program.</p>
+    <ul>
+      <li><code>POST /ops/tasks</code> create task</li>
+      <li><code>GET /ops/tasks/:taskId</code> get task</li>
+      <li><code>POST /ops/tasks/:taskId/run</code> run pending task</li>
+      <li><code>POST /ops/tasks/:taskId/callback</code> receive callback</li>
+      <li><code>GET /ops/dashboard</code> dashboard summary</li>
+    </ul>
+  </section>
+
+  <script>
+    const demo = { total: 0, pending: 0, running: 0, succeeded: 0, failed: 0 };
+    Object.keys(demo).forEach((key) => {
+      const node = document.getElementById(key);
+      if (node) node.textContent = String(demo[key]);
+    });
+  </script>
+</body>
+</html>
