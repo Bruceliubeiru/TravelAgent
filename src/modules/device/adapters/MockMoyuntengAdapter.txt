@@ -1,0 +1,1 @@
+MockMoyuntengAdapter placeholder. The exact JavaScript file name was blocked by the tool layer in this run.
