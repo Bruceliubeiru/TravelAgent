@@ -1,1 +1,1 @@
-placeholder
+module.exports = {};
