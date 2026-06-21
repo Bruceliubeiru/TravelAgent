@@ -19,11 +19,13 @@ TravelAgent is a WeChat Mini Program travel planning MVP. It focuses on Shanghai
   - Existing actions remain unchanged: `planTrip`, `recommendPoi`, `getTripTicket`, `resolvePurchaseTarget`, `trackEvent`.
 - Optional Ops Center: `src/modules/ops`
   - Optional plugin, off by default.
+  - P0 supports task creation, pending status, callback result, and dashboard summary through isolated handlers.
 - Optional Device Gateway: `src/modules/device`
   - Optional device abstraction, mock by default.
   - Moyunteng is only a Device Adapter and not a core dependency.
 - Core regression test: `tests/travel-regression.test.cjs`
 - Module boundary test: `tests/module-boundary.test.cjs`
+- Ops P0 test: `tests/ops-center-p0.test.cjs`
 
 ## Core flow
 
@@ -74,6 +76,7 @@ The current default handoff is to JP Trip city pages, keyword pages, or real det
 ```bash
 node tests/travel-regression.test.cjs
 node tests/module-boundary.test.cjs
+node tests/ops-center-p0.test.cjs
 ```
 
 Additional syntax checks:
